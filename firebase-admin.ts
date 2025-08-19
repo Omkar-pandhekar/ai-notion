@@ -2,33 +2,33 @@ import { initializeApp, getApps, getApp, App, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin";
 
-const hasEnv =
-  process.env.FB_PROJECT_ID &&
-  process.env.FB_CLIENT_EMAIL &&
-  process.env.FB_PRIVATE_KEY;
+let app: App | null = null;
 
-const serviceAccount: ServiceAccount = hasEnv
-  ? {
-      projectId: process.env.FB_PROJECT_ID!,
-      clientEmail: process.env.FB_CLIENT_EMAIL!,
-      privateKey: process.env.FB_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-    }
-  : (() => {
-      throw new Error(
-        "Firebase admin credentials missing. Set FB_PROJECT_ID, FB_CLIENT_EMAIL, FB_PRIVATE_KEY."
-      );
-    })();
+function ensureApp() {
+  if (app) return app;
 
-let app: App;
+  const projectId = process.env.FB_PROJECT_ID;
+  const clientEmail = process.env.FB_CLIENT_EMAIL;
+  const rawKey = process.env.FB_PRIVATE_KEY;
 
-if (getApps().length === 0) {
-  app = initializeApp({
-    credential: cert(serviceAccount),
-  });
-} else {
-  app = getApp();
+  if (!projectId || !clientEmail || !rawKey) {
+    throw new Error(
+      "Firebase admin credentials missing. Set FB_PROJECT_ID, FB_CLIENT_EMAIL, FB_PRIVATE_KEY."
+    );
+  }
+
+  const serviceAccount: ServiceAccount = {
+    projectId,
+    clientEmail,
+    privateKey: rawKey.replace(/\\n/g, "\n"),
+  };
+
+  app = getApps().length
+    ? getApp()
+    : initializeApp({ credential: cert(serviceAccount) });
+  return app;
 }
 
-const adminDb = getFirestore(app);
-
-export { app as adminApp, adminDb };
+export function getAdminDb() {
+  return getFirestore(ensureApp());
+}

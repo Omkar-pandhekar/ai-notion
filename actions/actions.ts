@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { adminDb } from "../firebase-admin";
+import { getAdminDb } from "../firebase-admin";
 import liveblocks from "@/lib/liveblocks";
 
 export async function createNewDocument() {
@@ -9,6 +9,7 @@ export async function createNewDocument() {
 
   const { sessionClaims } = await auth();
 
+  const adminDb = getAdminDb();
   const docCollectionRef = adminDb.collection("documents");
   const docRef = await docCollectionRef.add({
     title: "New Document",
@@ -34,6 +35,7 @@ export async function deleteDocument(roomId: string) {
   console.log("deleteDocument", roomId);
 
   try {
+    const adminDb = getAdminDb();
     await adminDb.collection("documents").doc(roomId).delete();
 
     const query = await adminDb
@@ -61,6 +63,7 @@ export async function inviteUserToDocument(roomId: string, email: string) {
   console.log("inviteUserToDocument", roomId, email);
 
   try {
+    const adminDb = getAdminDb();
     await adminDb
       .collection("users")
       .doc(email)
@@ -84,6 +87,7 @@ export async function removeUserFromDocument(roomId: string, email: string) {
   console.log("removeUserFromDocument", roomId, email);
 
   try {
+    const adminDb = getAdminDb();
     await adminDb
       .collection("users")
       .doc(email)
