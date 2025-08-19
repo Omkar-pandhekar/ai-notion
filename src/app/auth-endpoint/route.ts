@@ -1,7 +1,7 @@
 import liveblocks from "@/lib/liveblocks";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb } from "../firebase-admin";
+import { adminDb } from "../../../firebase-admin";
 
 export async function POST(req: NextRequest) {
   auth.protect();
@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
   const session = liveblocks.prepareSession(sessionClaims.sub, {
     userInfo: { name, email, avatar },
   });
-
-  const adminDb = getAdminDb();
 
   const usersInRoom = await adminDb
     .collectionGroup("rooms")
