@@ -2,7 +2,7 @@
 import {
   ClientSideSuspense,
   RoomProvider as RoomProviderWrapper,
-} from "@liveblocks/react";
+} from "@liveblocks/react/suspense";
 import LoadingSpinner from "./LoadingSpinner";
 import LiveCursorProvider from "./LiveCursorProvider";
 

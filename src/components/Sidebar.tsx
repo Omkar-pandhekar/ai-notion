@@ -16,9 +16,8 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../firebase";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { useRouter } from "next/navigation";
 import SidebarOption from "./SidebarOption";
 
 interface RoomDocument extends DocumentData {
@@ -37,16 +36,21 @@ const Sidebar = () => {
     owner: [],
     editor: [],
   });
-  const userEmail = user?.user?.emailAddresses?.[0].toString(); // Safely access the email
 
-  const [data, loading, error] = useCollection(
-    userEmail
-      ? query(
-          collectionGroup(db, "rooms"),
-          where("userId", "==", userEmail) // Use the email only if it's defined
-        )
-      : null // Return null if userEmail is not defined
+  const email =
+    user.user?.primaryEmailAddress?.emailAddress ??
+    user.user?.emailAddresses?.[0]?.emailAddress ??
+    null;
+
+  const roomsQuery = useMemo(
+    () =>
+      email
+        ? query(collectionGroup(db, "rooms"), where("userId", "==", email))
+        : null,
+    [email]
   );
+
+  const [data, loading, error] = useCollection(roomsQuery);
 
   useEffect(() => {
     if (!data) return;

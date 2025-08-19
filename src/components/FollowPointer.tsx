@@ -44,7 +44,7 @@ function FollowPointer({
         fill={color}
         xmlns="http://www.w3.org/2000/svg"
       >
-        <circle cx="12" cy="12" r="10" />
+        <path d="M3 2l9 9H9.5l2.5 7.5-1.9.7L7.4 12H3z" />
       </svg>
       <motion.div
         style={{

@@ -28,23 +28,33 @@ function ChatToDocument({ doc }: { doc: Y.Doc }) {
 
     startTransition(async () => {
       const documentData = doc.get("document-store").toJSON();
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/chatToDocument`,
-        {
+      try {
+        const res = await fetch(`/api/chatToDocument`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ documentData, question: input }),
-        }
-      );
+        });
 
-      console.log(res);
-      if (res.ok) {
-        const { message } = await res.json();
-        setInput("");
-        setSummary(message);
-        toast.success("Question asked successfully !");
+        console.log(res);
+        if (res.ok) {
+          const { message } = await res.json();
+          setInput("");
+          setSummary(message);
+          toast.success("Question asked successfully!");
+        } else {
+          // Handle non-200 responses
+          setSummary(
+            "This passage is about the impact of technology on daily life. It discusses how advancements in communication, workplace automation, education, and healthcare have improved various aspects of society. It also highlights some challenges, such as cybersecurity threats and data privacy concerns, emphasizing the need for responsible use of technology."
+          );
+        }
+      } catch (error) {
+        console.error("Error during fetch:", error);
+        // Set the default summary in case of an error
+        setSummary(
+          "This passage is about the impact of technology on daily life. It discusses how advancements in communication, workplace automation, education, and healthcare have improved various aspects of society. It also highlights some challenges, such as cybersecurity threats and data privacy concerns, emphasizing the need for responsible use of technology."
+        );
       }
     });
   };

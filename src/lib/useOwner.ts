@@ -9,25 +9,25 @@ function useOwner() {
   const { user } = useUser();
   const room = useRoom();
   const [isOwner, setIsOwner] = useState(false);
+
+  const currentEmail = user?.emailAddresses?.[0]?.emailAddress;
+
   const [usersInRoom] = useCollection(
-    user && query(collectionGroup(db, "rooms"), where("roomId", "==", room.id))
+    currentEmail
+      ? query(collectionGroup(db, "rooms"), where("roomId", "==", room.id))
+      : null
   );
 
   useEffect(() => {
-    if (usersInRoom?.docs && usersInRoom.docs.length > 0) {
+    if (usersInRoom?.docs && usersInRoom.docs.length > 0 && currentEmail) {
       const owners = usersInRoom.docs.filter(
         (doc) => doc.data().role === "owner"
       );
-
-      if (
-        owners.some(
-          (owner) => owner.data().userId === user?.emailAddresses[0].toString()
-        )
-      ) {
-        setIsOwner(true);
-      }
+      setIsOwner(owners.some((owner) => owner.data().userId === currentEmail));
+      return;
     }
-  }, [usersInRoom, user]);
+    setIsOwner(false);
+  }, [usersInRoom, currentEmail]);
 
   return isOwner;
 }
