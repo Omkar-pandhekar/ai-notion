@@ -1,13 +1,23 @@
 import { initializeApp, getApps, getApp, App, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin";
-import serviceKey from "./service_key.json";
 
-const serviceAccount: ServiceAccount = {
-  projectId: serviceKey.project_id,
-  clientEmail: serviceKey.client_email,
-  privateKey: serviceKey.private_key.replace(/\\n/g, "\n"),
-};
+const hasEnv =
+  process.env.FB_PROJECT_ID &&
+  process.env.FB_CLIENT_EMAIL &&
+  process.env.FB_PRIVATE_KEY;
+
+const serviceAccount: ServiceAccount = hasEnv
+  ? {
+      projectId: process.env.FB_PROJECT_ID!,
+      clientEmail: process.env.FB_CLIENT_EMAIL!,
+      privateKey: process.env.FB_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+    }
+  : (() => {
+      throw new Error(
+        "Firebase admin credentials missing. Set FB_PROJECT_ID, FB_CLIENT_EMAIL, FB_PRIVATE_KEY."
+      );
+    })();
 
 let app: App;
 

@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { useRoom } from "@liveblocks/react/";
+import { useRoom } from "@liveblocks/react";
 import { collectionGroup, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
