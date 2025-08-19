@@ -7,9 +7,15 @@ let app: App | null = null;
 function ensureApp() {
   if (app) return app;
 
-  const projectId = process.env.FB_PROJECT_ID;
-  const clientEmail = process.env.FB_CLIENT_EMAIL;
-  const rawKey = process.env.FB_PRIVATE_KEY;
+  const projectId = process.env.FB_PROJECT_ID!;
+  const clientEmail = process.env.FB_CLIENT_EMAIL!;
+  const rawKey =
+    process.env.FB_PRIVATE_KEY ??
+    (process.env.FB_PRIVATE_KEY_BASE64
+      ? Buffer.from(process.env.FB_PRIVATE_KEY_BASE64, "base64").toString(
+          "utf8"
+        )
+      : "");
 
   if (!projectId || !clientEmail || !rawKey) {
     throw new Error(
@@ -17,11 +23,13 @@ function ensureApp() {
     );
   }
 
-  const serviceAccount: ServiceAccount = {
-    projectId,
-    clientEmail,
-    privateKey: rawKey.replace(/\\n/g, "\n"),
-  };
+  const privateKey = rawKey
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/^"|"$/g, "");
+
+  const serviceAccount: ServiceAccount = { projectId, clientEmail, privateKey };
 
   app = getApps().length
     ? getApp()
